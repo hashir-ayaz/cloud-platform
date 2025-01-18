@@ -1,0 +1,6 @@
+[submodule "frontend-cloud-platform"]
+	path = frontend-cloud-platform
+	url = https://github.com/hashir-ayaz/frontend-cloud-platform.git
+[submodule "auth-api-cloud-platform"]
+	path = auth-api-cloud-platform
+	url = https://github.com/hashir-ayaz/auth-api-cloud-platform.git
