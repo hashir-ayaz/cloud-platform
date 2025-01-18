@@ -4,3 +4,6 @@
 [submodule "auth-api-cloud-platform"]
 	path = auth-api-cloud-platform
 	url = https://github.com/hashir-ayaz/auth-api-cloud-platform.git
+[submodule "container-service-cloud-platform"]
+	path = container-service-cloud-platform
+	url = https://github.com/hashir-ayaz/container-service-cloud-platform.git
