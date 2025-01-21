@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: flaskuser
+      POSTGRES_PASSWORD: flaskpassword
+      POSTGRES_DB: flaskdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - flask_network
+
+  frontend:
+    build:
+      context: ./frontend-cloud-platform
+      dockerfile: Dockerfile
+    container_name: frontend_container
+    ports:
+      - "5173:5173"
+    networks:
+      - flask_network
+    environment:
+      - VITE_AUTH_SERVICE_URL=http://localhost:5000/api
+      - VITE_CONTAINER_SERVICE_URL=http://localhost:5001/api/
+    depends_on:
+      - auth_service
+
+  auth_service:
+    build:
+      context: ./auth-api-cloud-platform
+      dockerfile: Dockerfile
+    container_name: auth_service
+    environment:
+      - DATABASE_URL=postgresql://flaskuser:flaskpassword@db:5432/flaskdb
+      - SECRET_KEY=yummysecret
+    ports:
+      - "5000:5000"
+    networks:
+      - flask_network
+    depends_on:
+      - db
+
+  container_service:
+    build:
+      context: ./container-service-cloud-platform
+      dockerfile: Dockerfile
+    container_name: container_service
+    environment:
+      - DATABASE_URL=postgresql://flaskuser:flaskpassword@db:5432/flaskdb
+      - SECRET_KEY=yummysecret
+    ports:
+      - "5001:5001"
+    networks:
+      - flask_network
+    depends_on:
+      - db
+
+volumes:
+  db_data:
+
+networks:
+  flask_network:
