@@ -23,8 +23,10 @@ services:
     networks:
       - flask_network
     environment:
-      - VITE_AUTH_SERVICE_URL=http://auth_service:5000/api
-      - VITE_CONTAINER_SERVICE_URL=http://container_service:5001/api/
+      # - VITE_AUTH_SERVICE_URL=http://auth_service:5000/api
+      # - VITE_CONTAINER_SERVICE_URL=http://container_service:5001/api/
+      - VITE_AUTH_SERVICE_URL=http://142.93.214.0:5000/api
+      - VITE_CONTAINER_SERVICE_URL=http://142.93.214.0:5001/api/
     depends_on:
       - auth_service
 
