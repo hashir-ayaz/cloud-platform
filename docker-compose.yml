@@ -23,8 +23,8 @@ services:
     networks:
       - flask_network
     environment:
-      - VITE_AUTH_SERVICE_URL=http://auth_service:5000/api
-      - VITE_CONTAINER_SERVICE_URL=http://container_service:5001/api/
+      - VITE_AUTH_SERVICE_URL=${VITE_AUTH_SERVICE_URL}
+      - VITE_CONTAINER_SERVICE_URL=${VITE_CONTAINER_SERVICE_URL}
     depends_on:
       - auth_service
 
@@ -35,7 +35,7 @@ services:
     container_name: auth_service
     environment:
       - DATABASE_URL=postgresql://flaskuser:flaskpassword@db:5432/flaskdb
-      - SECRET_KEY=yummysecret
+      - SECRET_KEY=${SECRET_KEY}
     ports:
       - "5000:5000"
     networks:
@@ -50,11 +50,14 @@ services:
     container_name: container_service
     environment:
       - DATABASE_URL=postgresql://flaskuser:flaskpassword@db:5432/flaskdb
-      - SECRET_KEY=yummysecret
+      - SECRET_KEY=${SECRET_KEY}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
     ports:
       - "5001:5001"
     networks:
       - flask_network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Mount Docker socket
     depends_on:
       - db
 
