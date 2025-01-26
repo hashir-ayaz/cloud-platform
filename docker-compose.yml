@@ -61,6 +61,21 @@ services:
     depends_on:
       - db
 
+  caddy:
+    image: caddy:latest
+    container_name: caddy_proxy
+    ports:
+      - "80:80" # HTTP
+      - "443:443" # HTTPS
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro # Mount the Caddyfile
+    networks:
+      - flask_network
+    depends_on:
+      - frontend
+      - auth_service
+      - container_service
+
 volumes:
   db_data:
 

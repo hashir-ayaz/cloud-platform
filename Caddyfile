@@ -1,0 +1,30 @@
+
+{
+    # Global options
+    admin localhost:2019
+    auto_https off # Disable HTTPS for local development
+    email hashirayaz@gmail.com  # Use your email for SSL
+}
+
+# Proxy frontend
+http://localhost {
+    reverse_proxy / http://frontend_container:5173
+}
+
+# Proxy API routes to auth_service
+http://localhost/api/auth/* {
+    reverse_proxy http://auth_service:5000
+}
+
+# Proxy API routes to container_service
+http://localhost/api/api-keys/* {
+    reverse_proxy http://container_service:5001
+}
+
+http://localhost/api/models/* {
+    reverse_proxy http://container_service:5001
+}
+
+http://localhost/api/deploy/* {
+    reverse_proxy http://container_service:5001
+}
