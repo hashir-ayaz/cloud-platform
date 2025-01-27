@@ -19,7 +19,7 @@ services:
       dockerfile: Dockerfile
     container_name: frontend_container
     ports:
-      - "5173:5173"
+      - "4173:4173"
     networks:
       - flask_network
     environment:
