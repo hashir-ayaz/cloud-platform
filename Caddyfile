@@ -30,11 +30,11 @@ http://localhost/api/* {
 # Reverse proxy for the frontend with SPA fallback
 http://localhost {
     encode gzip  # Enable gzip compression
-    reverse_proxy http://frontend_container:5173 {
+    reverse_proxy http://frontend_container:4173 {
         header_up Host {http.reverse_proxy.upstream.hostport}
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
         header_up X-Forwarded-Proto {scheme}
     }
-    rewrite * /index.html  # Serve index.html for SPA routes
+    try_files {path} /index.html  # Serve index.html for SPA routes
 }
