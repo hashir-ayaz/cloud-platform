@@ -1,12 +1,12 @@
 {
     # Global options
     admin localhost:2019
-    auto_https off  # Disable HTTPS for local development
     email hashirayaz@gmail.com  # Use your email for SSL
+    
 }
 
 # Proxy API routes to auth_service
-http://localhost/api/auth/* {
+https://hashirayaz.site/api/auth/* {
     encode gzip  # Enable gzip compression
     reverse_proxy http://auth_service:5000 {
         header_up Host {http.reverse_proxy.upstream.hostport}
@@ -17,7 +17,7 @@ http://localhost/api/auth/* {
 }
 
 # Proxy API routes to container_service
-http://localhost/api/* {
+https://hashirayaz.site/api/* {
     encode gzip  # Enable gzip compression
     reverse_proxy http://container_service:5001 {
         header_up Host {http.reverse_proxy.upstream.hostport}
@@ -28,7 +28,7 @@ http://localhost/api/* {
 }
 
 # Reverse proxy for the frontend with SPA fallback
-http://localhost {
+https://hashirayaz.site {
     encode gzip  # Enable gzip compression
     reverse_proxy http://frontend_container:4173 {
         header_up Host {http.reverse_proxy.upstream.hostport}
