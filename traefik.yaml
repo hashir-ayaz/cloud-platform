@@ -1,48 +1,88 @@
+# Static configuration
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+api:
+  dashboard: true # Enables the Traefik dashboard (accessible on /dashboard)
+
+certificatesResolvers:
+  myresolver:
+    acme:
+      email: hashirayaz@gmail.com
+      storage: acme.json
+      httpChallenge:
+        entryPoint: web
+
+# Dynamic configuration (routers, services, middlewares)
 http:
-  routers:
-    auth-service:
-      rule: "Host(`hashirayaz.site`) && PathPrefix(`/api/auth`)"
-      entryPoints:
-        - websecure
-      service: auth-service
-      tls: {}
-
-    container-service:
-      rule: "Host(`hashirayaz.site`) && PathPrefix(`/api`)"
-      entryPoints:
-        - websecure
-      service: container-service
-      tls: {}
-
-    frontend:
-      rule: "Host(`hashirayaz.site`)"
-      entryPoints:
-        - websecure
-      service: frontend
-      middlewares:
-        - spa-redirect
-      tls: {}
-
-  services:
-    auth-service:
-      loadBalancer:
-        servers:
-          - url: "http://auth_service:5000"
-
-    container-service:
-      loadBalancer:
-        servers:
-          - url: "http://container_service:5001"
-
-    frontend:
-      loadBalancer:
-        servers:
-          - url: "http://frontend_container:4173"
-
   middlewares:
-    spa-redirect:
+    # Enable gzip compression
+    compress:
+      compress: {}
+
+    # (Optional) SPA fallback middleware.
+    # This middleware intercepts 404 responses and rewrites the URL to "/index.html"
+    # Note: Be cautious as this is not exactly equivalent to Caddy’s try_files.
+    spaFallback:
       errors:
         status:
           - "404"
-        service: frontend
+        service: frontendService
         query: "/index.html"
+
+  routers:
+    # Router for API requests to the auth service.
+    authRouter:
+      rule: "Host(`hashirayaz.site`) && PathPrefix(`/api/auth/`)"
+      entryPoints:
+        - websecure
+      service: authService
+      middlewares:
+        - compress
+      tls:
+        certResolver: myresolver
+      priority: 100
+
+    # Router for API requests to the container service.
+    containerRouter:
+      rule: "Host(`hashirayaz.site`) && PathPrefix(`/api/`)"
+      entryPoints:
+        - websecure
+      service: containerService
+      middlewares:
+        - compress
+      tls:
+        certResolver: myresolver
+      priority: 50
+
+    # Router for the frontend.
+    # (It matches any request for hashirayaz.site.)
+    frontendRouter:
+      rule: "Host(`hashirayaz.site`)"
+      entryPoints:
+        - websecure
+      service: frontendService
+      middlewares:
+        - compress
+        # Uncomment the next line if you want Traefik to attempt an SPA fallback:
+        # - spaFallback
+      tls:
+        certResolver: myresolver
+      priority: 10
+
+  services:
+    authService:
+      loadBalancer:
+        servers:
+          - url: "http://auth_service:5000"
+    containerService:
+      loadBalancer:
+        servers:
+          - url: "http://container_service:5001"
+    frontendService:
+      loadBalancer:
+        servers:
+          - url: "http://frontend_container:4173"

@@ -18,8 +18,12 @@ services:
       context: ./frontend-cloud-platform
       dockerfile: Dockerfile
     container_name: frontend_container
-    ports:
-      - "4173:4173"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`hashirayaz.site`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+      - "traefik.http.middlewares.compress.compress=true"
     networks:
       - flask_network
     environment:
@@ -33,11 +37,15 @@ services:
       context: ./auth-api-cloud-platform
       dockerfile: Dockerfile
     container_name: auth_service
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth.rule=Host(`hashirayaz.site`) && PathPrefix(`/api/auth/`)"
+      - "traefik.http.routers.auth.entrypoints=websecure"
+      - "traefik.http.routers.auth.tls.certresolver=myresolver"
+      - "traefik.http.middlewares.compress.compress=true"
     environment:
       - DATABASE_URL=postgresql://flaskuser:flaskpassword@db:5432/flaskdb
       - SECRET_KEY=${SECRET_KEY}
-    ports:
-      - "5000:5000"
     networks:
       - flask_network
     depends_on:
@@ -48,12 +56,16 @@ services:
       context: ./container-service-cloud-platform
       dockerfile: Dockerfile
     container_name: container_service
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.container.rule=Host(`hashirayaz.site`) && PathPrefix(`/api/`)"
+      - "traefik.http.routers.container.entrypoints=websecure"
+      - "traefik.http.routers.container.tls.certresolver=myresolver"
+      - "traefik.http.middlewares.compress.compress=true"
     environment:
       - DATABASE_URL=postgresql://flaskuser:flaskpassword@db:5432/flaskdb
       - SECRET_KEY=${SECRET_KEY}
       - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
-    ports:
-      - "5001:5001"
     networks:
       - flask_network
     volumes:
@@ -61,23 +73,31 @@ services:
     depends_on:
       - db
 
-  caddy:
-    image: caddy:latest
-    container_name: caddy_proxy
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik_proxy
+    restart: always
     ports:
       - "80:80" # HTTP
       - "443:443" # HTTPS
+    command:
+      - "--api.dashboard=true" # Enable Traefik dashboard
+      - "--providers.docker=true" # Enable Docker provider
+      - "--providers.docker.exposedbydefault=false" # Only route containers with traefik.enable=true
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.email=hashirayaz@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro # Mount the Caddyfile
+      - /var/run/docker.sock:/var/run/docker.sock # Allow Traefik to discover containers
+      - ./letsencrypt:/letsencrypt # Persist SSL certs
     networks:
       - flask_network
-    depends_on:
-      - frontend
-      - auth_service
-      - container_service
 
 volumes:
   db_data:
+  letsencrypt: # Persistent storage for SSL certificates
 
 networks:
   flask_network:
