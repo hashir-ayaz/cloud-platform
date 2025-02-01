@@ -1,3 +1,4 @@
+
 services:
   db:
     image: postgres:15
@@ -23,6 +24,7 @@ services:
       - "traefik.http.routers.frontend.rule=Host(`hashirayaz.site`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+      - "traefik.http.services.frontend.loadbalancer.server.port=4173"
       - "traefik.http.middlewares.compress.compress=true"
     networks:
       - flask_network
@@ -42,6 +44,7 @@ services:
       - "traefik.http.routers.auth.rule=Host(`hashirayaz.site`) && PathPrefix(`/api/auth/`)"
       - "traefik.http.routers.auth.entrypoints=websecure"
       - "traefik.http.routers.auth.tls.certresolver=myresolver"
+      - "traefik.http.services.auth.loadbalancer.server.port=5000"
       - "traefik.http.middlewares.compress.compress=true"
     environment:
       - DATABASE_URL=postgresql://flaskuser:flaskpassword@db:5432/flaskdb
@@ -61,6 +64,7 @@ services:
       - "traefik.http.routers.container.rule=Host(`hashirayaz.site`) && PathPrefix(`/api/`)"
       - "traefik.http.routers.container.entrypoints=websecure"
       - "traefik.http.routers.container.tls.certresolver=myresolver"
+      - "traefik.http.services.container.loadbalancer.server.port=5001"
       - "traefik.http.middlewares.compress.compress=true"
     environment:
       - DATABASE_URL=postgresql://flaskuser:flaskpassword@db:5432/flaskdb
@@ -69,7 +73,7 @@ services:
     networks:
       - flask_network
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock # Mount Docker socket
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - db
 
@@ -78,7 +82,7 @@ services:
     container_name: traefik_proxy
     restart: always
     ports:
-      - "80:80" # HTTP
+      - "80:80"  # HTTP
       - "443:443" # HTTPS
     command:
       - "--api.dashboard=true" # Enable Traefik dashboard
@@ -90,14 +94,14 @@ services:
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock # Allow Traefik to discover containers
-      - ./letsencrypt:/letsencrypt # Persist SSL certs
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./letsencrypt:/letsencrypt
     networks:
       - flask_network
 
 volumes:
   db_data:
-  letsencrypt: # Persistent storage for SSL certificates
+  letsencrypt:
 
 networks:
   flask_network:
