@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: flaskpassword
       POSTGRES_DB: flaskdb
     ports:
-      - "5432:5432"  # ✅ Allows direct database access
+      - "5432:5432" # ✅ Allows direct database access
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
@@ -19,7 +19,7 @@ services:
       dockerfile: Dockerfile
     container_name: frontend_container
     ports:
-      - "4173:4173"  # ✅ Expose frontend for direct access
+      - "4173:4173" # ✅ Expose frontend for direct access
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`hashirayaz.site`)"
@@ -40,7 +40,7 @@ services:
       dockerfile: Dockerfile
     container_name: auth_service
     ports:
-      - "5000:5000"  # ✅ Allows direct access to auth service
+      - "5000:5000" # ✅ Allows direct access to auth service
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.auth.rule=Host(`hashirayaz.site`) && PathPrefix(`/api/auth/`)"
@@ -61,7 +61,7 @@ services:
       dockerfile: Dockerfile
     container_name: container_service
     ports:
-      - "5001:5001"  # ✅ Allows direct access to container service
+      - "5001:5001" # ✅ Allows direct access to container service
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.container.rule=Host(`hashirayaz.site`) && PathPrefix(`/api/`)"
@@ -72,6 +72,7 @@ services:
       - DATABASE_URL=postgresql://flaskuser:flaskpassword@db:5432/flaskdb
       - SECRET_KEY=${SECRET_KEY}
       - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - DOMAIN=${DOMAIN}
     networks:
       - flask_network
     volumes:
@@ -84,9 +85,9 @@ services:
     container_name: traefik_proxy
     restart: always
     ports:
-      - "80:80"   # HTTP for public access
+      - "80:80" # HTTP for public access
       - "443:443" # HTTPS for public access
-      - "8080:8080"  # Traefik dashboard
+      - "8080:8080" # Traefik dashboard
     command:
       - "--api.dashboard=true" # Enable Traefik dashboard
       - "--api.insecure=true"
@@ -94,7 +95,7 @@ services:
       - "--providers.docker.exposedbydefault=false" # Only route containers with traefik.enable=true
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.traefik.address=:8080" 
+      - "--entrypoints.traefik.address=:8080"
       - "--certificatesresolvers.myresolver.acme.email=hashirayaz@gmail.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
