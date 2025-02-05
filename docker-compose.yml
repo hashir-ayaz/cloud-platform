@@ -85,8 +85,7 @@ services:
     container_name: traefik_proxy
     restart: always
     environment:
-      - GODADDY_API_KEY=${GODADDY_API_KEY}
-      - GODADDY_API_SECRET=${GODADDY_API_SECRET}
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
     ports:
       - "80:80"   # HTTP for public access
       - "443:443" # HTTPS for public access
@@ -100,9 +99,11 @@ services:
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.myresolver.acme.email=hashirayaz@gmail.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--configFile=/etc/traefik/traefik.yaml"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./letsencrypt:/letsencrypt
+      - ./traefik.yaml:/etc/traefik/traefik.yaml  
     networks:
       - flask_network
 

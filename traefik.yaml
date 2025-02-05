@@ -16,11 +16,18 @@ certificatesResolvers:
     acme:
       email: hashirayaz@gmail.com
       storage: acme.json
+      dnsChallenge:
+        provider: "cloudflare"
+        delayBeforeCheck: 10  
       # httpChallenge:
       #   entryPoint: web
-      dnsChallenge:
-        provider: "godaddy"
-        delayBeforeCheck: 0  
+
+providers:
+  docker:
+    exposedByDefault: false # Ensures only labeled containers are exposed
+  file:
+    filename: "/etc/traefik/traefik.yaml"
+    watch: true # Enables live config reloading
 
 
 # Dynamic configuration (routers, services, middlewares)
