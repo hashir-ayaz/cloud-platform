@@ -87,16 +87,6 @@ http:
         certResolver: myresolver
       priority: 10
 
-    userRouter:
-      rule: "HostRegexp(`{subdomain:[a-z0-9-]+}.hashirayaz.site`)"
-      entryPoints:
-        - websecure
-      service: userContainers
-      middlewares:
-        - compress
-      tls:
-        certResolver: myresolver
-
   services:
     authService:
       loadBalancer:
