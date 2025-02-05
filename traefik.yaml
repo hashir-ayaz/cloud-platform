@@ -16,8 +16,12 @@ certificatesResolvers:
     acme:
       email: hashirayaz@gmail.com
       storage: acme.json
-      httpChallenge:
-        entryPoint: web
+      # httpChallenge:
+      #   entryPoint: web
+      dnsChallenge:
+        provider: "godaddy"
+        delayBeforeCheck: 0  
+
 
 # Dynamic configuration (routers, services, middlewares)
 http:
@@ -76,6 +80,16 @@ http:
         certResolver: myresolver
       priority: 10
 
+    userRouter:
+      rule: "HostRegexp(`{subdomain:[a-z0-9-]+}.hashirayaz.site`)"
+      entryPoints:
+        - websecure
+      service: userContainers
+      middlewares:
+        - compress
+      tls:
+        certResolver: myresolver
+
   services:
     authService:
       loadBalancer:
@@ -89,3 +103,6 @@ http:
       loadBalancer:
         servers:
           - url: "http://frontend_container:4173"
+    userContainers:
+      loadBalancer:
+        servers: []

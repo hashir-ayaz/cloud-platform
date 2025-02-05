@@ -84,26 +84,28 @@ services:
     image: traefik:v2.10
     container_name: traefik_proxy
     restart: always
+    environment:
+      - GODADDY_API_KEY=${GODADDY_API_KEY}
+      - GODADDY_API_SECRET=${GODADDY_API_SECRET}
     ports:
-      - "80:80" # HTTP for public access
+      - "80:80"   # HTTP for public access
       - "443:443" # HTTPS for public access
       - "8080:8080" # Traefik dashboard
     command:
-      - "--api.dashboard=true" # Enable Traefik dashboard
+      - "--api.dashboard=true"  # Enable Traefik dashboard
       - "--api.insecure=true"
-      - "--providers.docker=true" # Enable Docker provider
-      - "--providers.docker.exposedbydefault=false" # Only route containers with traefik.enable=true
+      - "--providers.docker=true"  # ✅ Enable Docker provider
+      - "--providers.docker.exposedbydefault=false"  # Ensure only containers with labels are exposed
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.traefik.address=:8080"
       - "--certificatesresolvers.myresolver.acme.email=hashirayaz@gmail.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./letsencrypt:/letsencrypt
     networks:
       - flask_network
+
 
 volumes:
   db_data:
