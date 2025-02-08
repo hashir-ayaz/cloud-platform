@@ -18,7 +18,7 @@ certificatesResolvers:
       storage: acme.json
       dnsChallenge:
         provider: "cloudflare"
-        delayBeforeCheck: 10  
+        delayBeforeCheck: 10
       # httpChallenge:
       #   entryPoint: web
 
@@ -28,7 +28,6 @@ providers:
   file:
     filename: "/etc/traefik/traefik.yaml"
     watch: true # Enables live config reloading
-
 
 # Dynamic configuration (routers, services, middlewares)
 http:
@@ -46,6 +45,11 @@ http:
           - "404"
         service: frontendService
         query: "/index.html"
+
+    api-key-auth:
+      forwardAuth:
+        address: "http://container_service:5001/api/api-keys/validate"
+        trustForwardHeader: true
 
   routers:
     # Router for API requests to the auth service.
