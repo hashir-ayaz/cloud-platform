@@ -51,6 +51,11 @@ http:
         address: "http://container_service:5001/api/api-keys/validate"
         trustForwardHeader: true
 
+    rate-limit:
+      rateLimit:
+        average: 10 # Allow 10 requests per second
+        burst: 20
+
   routers:
     # Router for API requests to the auth service.
     authRouter:
